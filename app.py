@@ -1,16 +1,23 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from tensorflow.keras.models import load_model
+import tensorflow as tf
 import numpy as np
 import librosa
 from skimage.transform import resize
 import io
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Load the model
-model = load_model('trained_model.keras')
+# Try loading the model with custom_objects
+try:
+    model = load_model('trained_model.keras', custom_objects={'tf': tf})
+except:
+    # If that fails, try loading in TensorFlow 1.x compatibility mode
+    tf.compat.v1.disable_eager_execution()
+    model = load_model('trained_model.keras')
 
 classes = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
@@ -48,6 +55,7 @@ def model_prediction(X_test):
     max_count = np.max(counts)
     max_elements = unique_elements[counts==max_count]
     return max_elements[0]
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
