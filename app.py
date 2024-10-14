@@ -1,40 +1,17 @@
-import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Conv2D, MaxPooling2D, Dense, Flatten
+from tensorflow.keras.models import load_model
 import numpy as np
 import librosa
 from skimage.transform import resize
 import io
 
+
+
 app = Flask(__name__)
-CORS(app)
-
-def create_model():
-    inputs = Input(shape=(210, 210, 1))
-    x = Conv2D(32, (3, 3), activation='relu')(inputs)
-    x = MaxPooling2D((2, 2))(x)
-    x = Conv2D(64, (3, 3), activation='relu')(x)
-    x = MaxPooling2D((2, 2))(x)
-    x = Conv2D(64, (3, 3), activation='relu')(x)
-    x = Flatten()(x)
-    x = Dense(64, activation='relu')(x)
-    outputs = Dense(10, activation='softmax')(x)
-    
-    model = Model(inputs=inputs, outputs=outputs)
-    return model
-
-# Create the model
-model = create_model()
-
-# Load the weights
-try:
-    model.load_weights('trained_model.keras')
-    print("Model weights loaded successfully.")
-except Exception as e:
-    print(f"Error loading model weights: {str(e)}")
-    # You might want to raise an exception here if the model is crucial for your app
+CORS(app, resources={r"/*": {"origins": "https://sudhanvapadki.github.io"}})
+# Load the model
+model = load_model('trained_model.keras')
 
 classes = ['blues', 'classical', 'country', 'disco', 'hiphop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
 
@@ -95,10 +72,6 @@ def predict():
             return jsonify({'genre': predicted_genre})
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-
-@app.route('/')
-def home():
-    return "Music Genre Classification API is running!"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
