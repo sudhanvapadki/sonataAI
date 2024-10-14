@@ -52,27 +52,30 @@ def model_prediction(X_test):
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    print("Received prediction request")
     if 'file' not in request.files:
+        print("No file part in the request")
         return jsonify({'error': 'No file part'})
-    
+ 
     file = request.files['file']
     if file.filename == '':
+        print("No selected file")
         return jsonify({'error': 'No selected file'})
-    
+ 
     if file:
         try:
-            # Load and preprocess the audio file
+            print(f"Processing file: {file.filename}")
             file_content = io.BytesIO(file.read())
             X_test = load_and_preprocess_file(file_content)
-            
-            # Make prediction
+         
             c_index = model_prediction(X_test)
             predicted_genre = classes[c_index]
-            
+            print(f"Predicted genre: {predicted_genre}")
+         
             return jsonify({'genre': predicted_genre})
         except Exception as e:
+            print(f"Error processing file: {str(e)}")
             return jsonify({'error': str(e)}), 500
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
