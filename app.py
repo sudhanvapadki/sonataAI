@@ -8,7 +8,7 @@ import librosa
 from skimage.transform import resize
 import io
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://sudhanvapadki.github.io"}})
 
 def create_model():
@@ -104,6 +104,6 @@ def predict():
 def home():
     return "Music Genre Classification API is running!"
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
